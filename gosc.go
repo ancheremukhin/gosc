@@ -1,10 +1,15 @@
 package main
 
-import "os"
-import "fmt"
-import "time"
-import "net"
-import "strings"
+import (
+	"os"
+	"fmt"
+	"time"
+	"net"
+	"strings"
+	"syscall"
+	"bufio"
+	"golang.org/x/crypto/ssh/terminal"
+)
 
 const (
 	PORT = 9034
@@ -15,17 +20,34 @@ const (
 
 func main() {
 
-	fmt.Println("Executing", os.Args[1], "...")
-	command := fmt.Sprintf("%s\n", os.Args[1])
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "Usage: gosc <command> <ip> ... ")
+		syscall.Exit(1)
+	}
 
-	pos := 2
-	for pos < len(os.Args) {
+	fmt.Println("Executing", os.Args[1], "...")
+
+	command := fmt.Sprintf("%s\n", os.Args[1])
+	ips := make([]string, 0)
+
+	if terminal.IsTerminal(syscall.Stdin) {
+		ips = os.Args[2:]
+	} else {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Split(bufio.ScanWords)
+		for scanner.Scan() {
+			ips = append(ips, scanner.Text())
+		}
+	}
+
+	pos := 0
+	for pos < len(ips) {
 		end := pos + BATCH_SIZE
-		if end > len(os.Args) {
-			end = len(os.Args)
+		if end > len(ips) {
+			end = len(ips)
 		}
 
-		responses, _ := sc(command, os.Args[pos:end])
+		responses, _ := sc(command, ips[pos:end])
 		for _, r := range responses {
 			fmt.Println(r)
 		}
