@@ -8,7 +8,7 @@ import "strings"
 
 const (
 	PORT = 9034
-	BATCH_SIZE = 512
+	BATCH_SIZE = 1024
 	CONN_TIMEOUT = 3
 	RW_TIMEOUT = 10
 )
@@ -65,7 +65,7 @@ func sc(command string, ips []string) ([]string, error) {
 	}
 
 	var responses = make([]string, 0, len(ips))
-	for range ips {
+	for _ = range ips {
 		r := <- ch
 		responses = append(responses, strings.Trim(r, "\n "))
 	}
