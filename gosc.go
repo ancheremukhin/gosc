@@ -82,7 +82,7 @@ func sc(command string, ips []string) ([]string, error) {
 				return
 			}
 
-			ch <- string(buf)
+			ch <- fmt.Sprintf("%s %s", ip, string(buf))
 		}(ip)
 	}
 
